@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hazmat-cfr": {
+      "command": "npx",
+      "args": ["-y", "hazmat-cfr-mcp"]
+    }
+  }
+}

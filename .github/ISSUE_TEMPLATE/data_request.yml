@@ -1,0 +1,25 @@
+name: Public data request
+description: Request a cited public 49 CFR row or rule.
+title: "[Data]: "
+labels: ["data", "public-cfr"]
+body:
+  - type: input
+    id: id_number
+    attributes:
+      label: UN/NA number
+      placeholder: UN1090
+    validations:
+      required: false
+  - type: input
+    id: name
+    attributes:
+      label: Proper shipping name
+    validations:
+      required: false
+  - type: input
+    id: citation
+    attributes:
+      label: Public source URL
+      placeholder: https://www.ecfr.gov/...
+    validations:
+      required: true

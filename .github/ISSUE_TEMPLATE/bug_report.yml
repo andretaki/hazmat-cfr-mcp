@@ -1,0 +1,25 @@
+name: Bug report
+description: Report incorrect behavior in lookup, parsing, or validation.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: input
+    attributes:
+      label: Input
+      description: Paste the command, MCP tool input, or shipping description.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Public source citation
+      description: Link to eCFR or another public source if this is a regulatory-data issue.
+    validations:
+      required: false

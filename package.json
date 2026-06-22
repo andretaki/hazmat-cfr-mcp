@@ -1,0 +1,74 @@
+{
+  "name": "hazmat-cfr-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for public 49 CFR hazmat lookup, parsing, and basic compliance checks.",
+  "type": "module",
+  "mcpName": "io.github.andretaki/hazmat-cfr-mcp",
+  "main": "dist/index.js",
+  "bin": {
+    "hazmat-cfr-mcp": "dist/server.js",
+    "hazmat-cfr": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    }
+  },
+  "files": [
+    "dist",
+    "examples",
+    "server.json",
+    "README.md",
+    "LICENSE",
+    ".env.example"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx src/server.ts",
+    "demo": "tsx scripts/demo.ts",
+    "cli": "tsx src/cli.ts",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "scan:secrets": "node scripts/secret-scan.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andretaki/hazmat-cfr-mcp.git"
+  },
+  "homepage": "https://github.com/andretaki/hazmat-cfr-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/andretaki/hazmat-cfr-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "hazmat",
+    "49-cfr",
+    "dot",
+    "49-cfr",
+    "ecfr",
+    "dangerous-goods",
+    "logistics",
+    "chemicals",
+    "compliance"
+  ],
+  "author": "Andre Taki",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

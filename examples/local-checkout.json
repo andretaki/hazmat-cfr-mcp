@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hazmat-cfr": {
+      "command": "node",
+      "args": ["/absolute/path/to/hazmat-cfr-mcp/dist/server.js"]
+    }
+  }
+}
