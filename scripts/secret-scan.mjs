@@ -2,7 +2,9 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const root = process.cwd();
-const ignoredDirs = new Set(["node_modules", "dist", ".git"]);
+// Gitignored / non-committable local directories — out of scope for a scan that
+// protects what would actually be committed.
+const ignoredDirs = new Set(["node_modules", "dist", ".git", ".claude-transcripts", ".cache", "coverage"]);
 const findings = [];
 
 const patterns = [

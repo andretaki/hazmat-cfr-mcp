@@ -6,6 +6,12 @@ export const CFR_172_101: SourceCitation = {
   note: "eCFR explains that the table identifies hazard class, proper shipping name, labels, packaging references, aircraft quantity limits, and vessel stowage requirements.",
 };
 
+export const CFR_172_102: SourceCitation = {
+  title: "49 CFR 172.102 Special provisions",
+  url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-I/subchapter-C/part-172/subpart-B/section-172.102",
+  note: "Defines the special-provision codes (numeric, A, B, IB, IP, N, R, T, TP, W) referenced in Column 7 of the 172.101 table.",
+};
+
 export const CFR_172_315: SourceCitation = {
   title: "49 CFR 172.315 Limited quantities",
   url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-I/subchapter-C/part-172/subpart-D/section-172.315",
@@ -39,6 +45,7 @@ export const CFR_173_2A: SourceCitation = {
 
 export const ALL_SOURCES = [
   CFR_172_101,
+  CFR_172_102,
   CFR_172_202,
   CFR_172_315,
   CFR_173_150,

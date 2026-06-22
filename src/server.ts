@@ -7,26 +7,46 @@ import { getLabelRequirements } from "./labels.js";
 import { checkLimitedQuantityEligibility } from "./limited-quantity.js";
 import { parseShippingDescription } from "./parser.js";
 import { checkBasicSegregation } from "./segregation.js";
-import { ALL_SOURCES, CFR_172_101, CFR_172_202, CFR_172_315, CFR_177_848 } from "./sources.js";
+import { ALL_SOURCES, CFR_172_101, CFR_172_102, CFR_172_202, CFR_172_315, CFR_177_848 } from "./sources.js";
+import { decodeSpecialProvisions } from "./special-provisions.js";
+import { decodePackagingReference, decodeSymbol, decodeVesselStowageLocation } from "./legends.js";
 import { jsonToolResult } from "./tool-result.js";
 import { validateBasicHazmatDescription } from "./validation.js";
+import { ECFR_SNAPSHOT_DATE } from "./data/snapshot.js";
+import type { HazmatEntry } from "./types.js";
+
+/** Attach decoded symbols and special provisions to a table entry for tool output. */
+function decodeEntry(entry: HazmatEntry) {
+  return {
+    ...entry,
+    decoded: {
+      symbols: (entry.symbols ?? []).map(decodeSymbol),
+      specialProvisions: decodeSpecialProvisions(entry.specialProvisions),
+      vesselStowage: entry.vesselStowage.location ? decodeVesselStowageLocation(entry.vesselStowage.location) : undefined,
+    },
+  };
+}
 
 export function createServer(): McpServer {
   const server = new McpServer({
     name: "hazmat-cfr-mcp",
-    version: "0.1.0",
+    version: "0.2.0",
   });
 
   server.registerTool(
     "lookup_hazmat_entry",
     {
       title: "Lookup Hazmat Entry",
-      description: "Look up a hazardous material by UN/NA number or proper shipping name in the bundled public 49 CFR sample dataset.",
+      description:
+        "Look up a hazardous material by UN/NA number or proper shipping name in the complete 49 CFR 172.101 Hazardous Materials Table (pinned eCFR snapshot). Returns matching entries with decoded symbols and special provisions.",
       inputSchema: {
         query: z.string().min(1).describe("UN/NA number or proper shipping name, e.g. UN1090 or Acetone."),
       },
     },
-    async ({ query }) => jsonToolResult(defaultCatalog.lookup(query)),
+    async ({ query }) => {
+      const result = defaultCatalog.lookup(query);
+      return jsonToolResult({ ...result, entries: result.entries.map(decodeEntry) });
+    },
   );
 
   server.registerTool(
@@ -49,7 +69,7 @@ export function createServer(): McpServer {
     "validate_basic_hazmat_description",
     {
       title: "Validate Basic Hazmat Description",
-      description: "Validate a structured DOT hazmat description against the bundled public 49 CFR sample dataset.",
+      description: "Validate a structured DOT hazmat description against the complete 49 CFR 172.101 Hazardous Materials Table.",
       inputSchema: {
         idNumber: z.string().optional().describe("UN/NA number, e.g. UN1830."),
         properShippingName: z.string().optional().describe("Proper shipping name."),
@@ -65,7 +85,7 @@ export function createServer(): McpServer {
     "get_label_requirements",
     {
       title: "Get Label Requirements",
-      description: "Return hazard label codes for a UN/NA number or proper shipping name from the bundled public 49 CFR sample dataset.",
+      description: "Return hazard label codes for a UN/NA number or proper shipping name from the complete 49 CFR 172.101 Hazardous Materials Table.",
       inputSchema: {
         query: z.string().min(1).describe("UN/NA number or proper shipping name."),
       },
@@ -100,6 +120,33 @@ export function createServer(): McpServer {
       },
     },
     async (input) => jsonToolResult(checkLimitedQuantityEligibility(input)),
+  );
+
+  server.registerTool(
+    "decode_special_provision",
+    {
+      title: "Decode Special Provision",
+      description:
+        "Decode one or more Column 7 special-provision codes (e.g. IB2, T8, A3, 148) into their 49 CFR 172.102 text.",
+      inputSchema: {
+        codes: z.array(z.string().min(1)).min(1).describe("Special-provision codes, e.g. ['IB2', 'T8', 'A3']."),
+      },
+    },
+    async ({ codes }) => jsonToolResult({ provisions: decodeSpecialProvisions(codes), source: CFR_172_102 }),
+  );
+
+  server.registerTool(
+    "decode_packaging_reference",
+    {
+      title: "Decode Packaging Reference",
+      description:
+        "Resolve a Column 8A/8B/8C packaging value (e.g. '150', '202', 'None') to the 49 CFR part 173 section it references.",
+      inputSchema: {
+        column: z.enum(["exceptions", "nonBulk", "bulk"]).describe("Which packaging column: exceptions (8A), nonBulk (8B), bulk (8C)."),
+        code: z.string().optional().describe("The column value, e.g. '150', '202', '242', or 'None'."),
+      },
+    },
+    async ({ column, code }) => jsonToolResult(decodePackagingReference(column, code)),
   );
 
   server.registerTool(
@@ -147,9 +194,16 @@ function explainTopic(topic: string) {
       source: CFR_172_101,
     };
   }
+  if (normalized.includes("special provision") || normalized.includes("172.102")) {
+    return {
+      topic,
+      explanation: "Column 7 special-provision codes are defined in 49 CFR 172.102. Use decode_special_provision to expand a code into its regulatory text.",
+      source: CFR_172_102,
+    };
+  }
   return {
     topic,
-    explanation: "This server is backed by public CFR citations and a small demo dataset. Use the source list to verify any production decision against current regulations.",
+    explanation: `This server is backed by the complete 49 CFR 172.101 table (pinned eCFR snapshot ${ECFR_SNAPSHOT_DATE}) and public CFR citations. It is an informational aid, not legal advice — verify any shipping decision against the current eCFR.`,
     sources: ALL_SOURCES,
   };
 }
@@ -174,6 +228,8 @@ Tools:
   get_label_requirements
   check_basic_segregation
   check_limited_quantity_eligibility
+  decode_special_provision
+  decode_packaging_reference
   explain_cfr_source
 `);
     return;

@@ -1,6 +1,7 @@
 import {
   checkBasicSegregation,
   checkLimitedQuantityEligibility,
+  decodeSpecialProvisions,
   defaultCatalog,
   getLabelRequirements,
   parseShippingDescription,
@@ -44,6 +45,12 @@ const examples = [
         hazardClass: "3",
       }),
       segregation: checkBasicSegregation(["3", "5.1", "8"]),
+    }),
+  },
+  {
+    title: "Decode special provisions (172.102)",
+    run: () => ({
+      decoded: decodeSpecialProvisions(["IB2", "T8", "A3"]),
     }),
   },
 ];

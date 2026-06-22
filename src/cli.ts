@@ -2,13 +2,24 @@
 import {
   checkBasicSegregation,
   checkLimitedQuantityEligibility,
+  decodePackagingReference,
+  decodeSpecialProvisions,
   defaultCatalog,
   getLabelRequirements,
   parseShippingDescription,
   validateBasicHazmatDescription,
 } from "./index.js";
 
-type Command = "lookup" | "parse" | "validate" | "labels" | "segregation" | "lq" | "help";
+type Command =
+  | "lookup"
+  | "parse"
+  | "validate"
+  | "labels"
+  | "segregation"
+  | "lq"
+  | "decode-sp"
+  | "decode-pkg"
+  | "help";
 
 const [command = "help", ...args] = process.argv.slice(2) as [Command?, ...string[]];
 
@@ -32,6 +43,17 @@ try {
     case "lq":
       print(checkLimitedQuantityEligibility(parseLqArgs(args)));
       break;
+    case "decode-sp":
+      print(decodeSpecialProvisions(args.length > 0 ? args : fail("Pass one or more special-provision codes.")));
+      break;
+    case "decode-pkg": {
+      const [column, code] = args;
+      if (column !== "exceptions" && column !== "nonBulk" && column !== "bulk") {
+        fail("Usage: hazmat-cfr decode-pkg <exceptions|nonBulk|bulk> <code>");
+      }
+      print(decodePackagingReference(column, code));
+      break;
+    }
     case "help":
     default:
       usage();
@@ -71,17 +93,21 @@ function usage(): void {
   console.log(`hazmat-cfr
 
 Commands:
-  lookup <UN/NA/name>                         Look up a bundled public CFR sample row
+  lookup <UN/NA/name>                         Look up an entry in the full 49 CFR 172.101 table
   parse <description>                         Parse a shipping description
   validate <description>                      Parse and validate a description
   labels <UN/NA/name>                         Return hazard label codes
   segregation <class...>                      Check pairwise segregation warnings
   lq <class> <PG> <innerMl> <outerKg> [bool]  Conservative limited quantity screen
+  decode-sp <code...>                         Decode 172.102 special-provision codes
+  decode-pkg <column> <code>                  Resolve a packaging reference (exceptions|nonBulk|bulk)
 
 Examples:
   hazmat-cfr lookup UN1090
   hazmat-cfr validate "UN1090, Acetone, 3, PG II"
   hazmat-cfr segregation 3 5.1 8
   hazmat-cfr lq 3 II 1000 12 true
+  hazmat-cfr decode-sp IB2 T8 A3
+  hazmat-cfr decode-pkg nonBulk 202
 `);
 }

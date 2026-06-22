@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DIV8 N="172.102" TYPE="SECTION">
+<HEAD>§ 172.102 Special provisions.</HEAD>
+<FP-1>A3 For combination packagings, if glass inner packagings are used, they must be packed with absorbent material.</FP-1>
+<FP-1>148 The most recent version of the test described applies.</FP-1>
+<FP1-2>398 This entry applies to 1-butylene, cis-2-butylene and trans-2-butylene, and mixtures of butylenes.</FP1-2>
+<P>(6) <I>"R" codes.</I> These provisions apply only to transportation by rail.</P>
+<P>R1 A person who offers tank cars containing molten sulfur may reference the guidance document.</P>
+<P>TP1 The maximum degree of filling must not exceed the degree determined by the formula.</P>
+<TABLE>
+<CAPTION><P class="title">Table 1—IB Codes (IBC Codes)</P></CAPTION>
+<TR><TH>IBC code</TH><TH>Authorized IBCs</TH></TR>
+<TR><TD>IB2</TD><TD>Authorized IBCs: Metal (31A, 31B and 31N); Rigid plastics (31H1 and 31H2); Composite (31HZ1).</TD></TR>
+<TR><TD></TD><TD>Additional Requirement: Only liquids with a vapor pressure less than or equal to 110 kPa at 50 °C are authorized.</TD></TR>
+</TABLE>
+<TABLE>
+<CAPTION><P class="title">Table of Portable Tank T Codes</P></CAPTION>
+<TR><TH>Portable tank instruction(1)</TH><TH>Minimum test pressure (bar)(2)</TH><TH>Minimum shell thickness(See § 178.274(d))(3)</TH><TH>Pressure-relief requirements(See § 178.275(g))(4)</TH></TR>
+<TR><TD>T4</TD><TD>2.65</TD><TD>§ 178.274(d)(2)</TD><TD>Normal</TD></TR>
+<TR><TD>T7</TD><TD>4</TD><TD>§ 178.274(d)(2)</TD><TD>Normal</TD></TR>
+</TABLE>
+</DIV8>

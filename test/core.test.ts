@@ -3,6 +3,9 @@ import test from "node:test";
 import {
   checkBasicSegregation,
   checkLimitedQuantityEligibility,
+  decodePackagingReference,
+  decodeSpecialProvision,
+  decodeSymbol,
   defaultCatalog,
   getLabelRequirements,
   normalizeIdNumber,
@@ -19,10 +22,14 @@ test("normalizes UN/NA identifiers and packing groups", () => {
   assert.equal(normalizePackingGroup("iii"), "III");
 });
 
-test("looks up demo CFR entries by id and synonym", () => {
+test("looks up entries by id and synonym", () => {
   assert.equal(defaultCatalog.lookup("UN1090").entries[0]?.properShippingName, "Acetone");
+  // "Isopropyl alcohol" is part of UN1219's proper shipping name in the real table.
   assert.equal(defaultCatalog.lookup("isopropyl alcohol").entries[0]?.idNumber, "UN1219");
-  assert.equal(defaultCatalog.lookup("isopropyl alcohol").matches[0]?.reason, "exact synonym match: isopropyl alcohol");
+  // Curated synonyms still resolve via the synonym path.
+  const rubbing = defaultCatalog.lookup("rubbing alcohol");
+  assert.equal(rubbing.entries[0]?.idNumber, "UN1219");
+  assert.equal(rubbing.matches[0]?.reason, "exact synonym match: rubbing alcohol");
 });
 
 test("ranks sulfuric acid concentration qualifiers correctly", () => {
@@ -72,6 +79,28 @@ test("returns conservative segregation warnings", () => {
   const findings = checkBasicSegregation(["3", "5.1"]);
   assert.equal(findings[0]?.code, "O");
   assert.equal(findings[0]?.severity, "warning");
+});
+
+test("decodes special-provision codes from 172.102", () => {
+  const ib2 = decodeSpecialProvision("ib2");
+  assert.equal(ib2.known, true);
+  assert.equal(ib2.code, "IB2");
+  assert.match(ib2.text ?? "", /IBC/i);
+  assert.equal(decodeSpecialProvision("ZZZ999").known, false);
+});
+
+test("decodes Column 1 symbols and packaging references", () => {
+  assert.match(decodeSymbol("G").meaning ?? "", /technical name/i);
+  const nonBulk = decodePackagingReference("nonBulk", "202");
+  assert.equal(nonBulk.authorized, true);
+  assert.match(nonBulk.citation?.url ?? "", /173\.202/);
+  assert.equal(decodePackagingReference("exceptions", "None").authorized, false);
+});
+
+test("lookup resolves a UN number absent from the old 7-entry sample", () => {
+  const acetal = defaultCatalog.lookup("UN1088");
+  assert.equal(acetal.confidence, "high");
+  assert.equal(acetal.entries[0]?.properShippingName, "Acetal");
 });
 
 test("screens common limited quantity candidates conservatively", () => {
