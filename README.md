@@ -150,6 +150,10 @@ npm run typecheck
 npm run scan:secrets
 ```
 
+## Maintainer
+
+Andre Taki — [Alliance Chemical](https://alliancechemical.com) — andre@alliancechemical.com
+
 ## License
 
 MIT — the underlying 49 CFR text is a public-domain work of the U.S. government.
