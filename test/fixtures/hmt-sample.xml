@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DIV8 N="172.101" TYPE="SECTION">
+<HEAD>§ 172.101 Hazardous materials table.</HEAD>
+<TABLE>
+<TR>
+<TH>(1)<br></br>Symbols</TH><TH>(2) Description</TH><TH>(3) Class</TH><TH>(4) ID</TH><TH>(5) PG</TH><TH>(6) Labels</TH><TH>(7) Special provisions</TH><TH>(8A)</TH><TH>(8B)</TH><TH>(8C)</TH><TH>(9A)</TH><TH>(9B)</TH><TH>(10A)</TH><TH>(10B)</TH>
+</TR>
+<TR>
+<TD class="center border-right-single"> </TD>
+<TD class="left border-right-single">Acetone</TD>
+<TD class="right border-right-single">3</TD>
+<TD class="left border-right-single">UN1090</TD>
+<TD class="center border-right-single">II</TD>
+<TD class="left border-right-single">3</TD>
+<TD class="right border-right-single">IB2, T4, TP1</TD>
+<TD class="left border-right-single">150</TD>
+<TD class="left border-right-single">202</TD>
+<TD class="left border-right-single">242</TD>
+<TD class="right border-right-single">5 L</TD>
+<TD class="right border-right-single">60 L</TD>
+<TD class="left border-right-single">B</TD>
+<TD class="right"></TD>
+</TR>
+<TR>
+<TD class="center border-right-single"> </TD>
+<TD class="left border-right-single">Acetic anhydride</TD>
+<TD class="right border-right-single">8</TD>
+<TD class="left border-right-single">UN1715</TD>
+<TD class="center border-right-single">II</TD>
+<TD class="left border-right-single">8, 3</TD>
+<TD class="right border-right-single">A3, A7, A10, B2, IB2, T7, TP2</TD>
+<TD class="left border-right-single">154</TD>
+<TD class="left border-right-single">202</TD>
+<TD class="left border-right-single">243</TD>
+<TD class="right border-right-single">1 L</TD>
+<TD class="right border-right-single">30 L</TD>
+<TD class="left border-right-single">A</TD>
+<TD class="right">40, 53, 58</TD>
+</TR>
+<TR>
+<TD class="center border-right-single">G</TD>
+<TD class="left border-right-single">Adsorbed gas, n.o.s</TD>
+<TD class="right border-right-single">2.2</TD>
+<TD class="left border-right-single">UN3511</TD>
+<TD class="center border-right-single"></TD>
+<TD class="left border-right-single">2.2</TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single">None</TD>
+<TD class="left border-right-single">302c</TD>
+<TD class="left border-right-single">None</TD>
+<TD class="right border-right-single">75 kg</TD>
+<TD class="right border-right-single">150 kg</TD>
+<TD class="left border-right-single">A</TD>
+<TD class="right"></TD>
+</TR>
+<TR>
+<TD class="center border-right-single"> </TD>
+<TD class="left border-right-single"><E T="03">Acetyl acetone peroxide with more than 9 percent by mass active oxygen</E></TD>
+<TD class="right border-right-single">Forbidden</TD>
+<TD class="left border-right-single"></TD>
+<TD class="center border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right"></TD>
+</TR>
+<TR>
+<TD class="center border-right-single"> </TD>
+<TD class="left border-right-single">Accellerene, see p-Nitrosodimethylaniline</TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="center border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right"></TD>
+</TR>
+<TR>
+<TD class="center border-right-single"> </TD>
+<TD class="left border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="center border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="right border-right-single"></TD>
+<TD class="left border-right-single"></TD>
+<TD class="right"></TD>
+</TR>
+</TABLE>
+</DIV8>

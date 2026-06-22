@@ -25,10 +25,19 @@ export interface VesselStowage {
   other?: string;
 }
 
-export interface HazmatEntry {
-  idNumber: string;
+/**
+ * One row of the 49 CFR 172.101 Hazardous Materials Table, as published.
+ *
+ * `idNumber` is absent for "Forbidden" materials (they have no UN/NA number).
+ * `symbols` holds the Column 1 codes (+, A, D, G, I, W) that modify how the
+ * entry may be used (e.g. "G" requires a technical name in parentheses).
+ */
+export interface HazmatTableRow {
+  idNumber?: string;
   properShippingName: string;
   hazardClass: string;
+  forbidden?: boolean;
+  symbols?: string[];
   packingGroup?: PackingGroup;
   subsidiaryRisks: string[];
   labels: string[];
@@ -36,7 +45,16 @@ export interface HazmatEntry {
   packaging: PackagingReferences;
   quantityLimitations: QuantityLimitations;
   vesselStowage: VesselStowage;
+}
+
+/**
+ * A table row enriched with the curated synonym/CAS overlay and a source
+ * citation. The overlay fields are NOT from 172.101 — they are a maintained
+ * convenience layer (see src/data/synonyms.ts).
+ */
+export interface HazmatEntry extends HazmatTableRow {
   synonyms: string[];
+  cas?: string;
   source: SourceCitation;
 }
 

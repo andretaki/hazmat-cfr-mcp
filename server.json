@@ -1,17 +1,17 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.andretaki/hazmat-cfr-mcp",
-  "description": "Public 49 CFR hazmat lookup, parser, validation warnings, labels, limited quantity screening, and segregation citations for AI agents.",
+  "description": "Complete 49 CFR 172.101 Hazardous Materials Table lookup with special-provision decoding, parsing, validation, labels, limited-quantity screening, and segregation citations for AI agents — pinned to a dated eCFR revision.",
   "repository": {
     "url": "https://github.com/andretaki/hazmat-cfr-mcp",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "hazmat-cfr-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "transport": {
         "type": "stdio"
       }

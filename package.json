@@ -1,7 +1,7 @@
 {
   "name": "hazmat-cfr-mcp",
-  "version": "0.1.0",
-  "description": "MCP server for public 49 CFR hazmat lookup, parsing, and basic compliance checks.",
+  "version": "0.2.0",
+  "description": "MCP server for the complete 49 CFR 172.101 Hazardous Materials Table: hazmat lookup, special-provision decoding, parsing, and basic compliance checks — every field cited to a pinned eCFR revision.",
   "type": "module",
   "mcpName": "io.github.andretaki/hazmat-cfr-mcp",
   "main": "dist/index.js",
@@ -29,6 +29,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "ingest": "tsx scripts/ingest-ecfr.ts",
     "dev": "tsx src/server.ts",
     "demo": "tsx scripts/demo.ts",
     "cli": "tsx src/cli.ts",
@@ -50,9 +51,11 @@
     "hazmat",
     "49-cfr",
     "dot",
-    "49-cfr",
+    "phmsa",
     "ecfr",
     "dangerous-goods",
+    "hazardous-materials-table",
+    "special-provisions",
     "logistics",
     "chemicals",
     "compliance"
