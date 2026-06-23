@@ -6,15 +6,19 @@ import {
   decodeSpecialProvisions,
   defaultCatalog,
   getLabelRequirements,
+  getPlacard,
+  getShippingRequirements,
   parseShippingDescription,
   validateBasicHazmatDescription,
 } from "./index.js";
 
 type Command =
   | "lookup"
+  | "requirements"
   | "parse"
   | "validate"
   | "labels"
+  | "placard"
   | "segregation"
   | "lq"
   | "decode-sp"
@@ -27,6 +31,12 @@ try {
   switch (command) {
     case "lookup":
       print(defaultCatalog.lookup(requireArg(args, "query")));
+      break;
+    case "requirements":
+      print(getShippingRequirements(requireArg(args, "query")));
+      break;
+    case "placard":
+      print(getPlacard(requireArg(args, "hazard class")));
       break;
     case "parse":
       print(parseShippingDescription(requireArg(args, "shipping description")));
@@ -94,6 +104,8 @@ function usage(): void {
 
 Commands:
   lookup <UN/NA/name>                         Look up an entry in the full 49 CFR 172.101 table
+  requirements <UN/NA/name>                   One-call shipping requirements (labels, packaging, placard, ...)
+  placard <class>                             49 CFR 172.504 placard name + threshold for a hazard class
   parse <description>                         Parse a shipping description
   validate <description>                      Parse and validate a description
   labels <UN/NA/name>                         Return hazard label codes
@@ -104,6 +116,8 @@ Commands:
 
 Examples:
   hazmat-cfr lookup UN1090
+  hazmat-cfr requirements UN1830
+  hazmat-cfr placard 2.3
   hazmat-cfr validate "UN1090, Acetone, 3, PG II"
   hazmat-cfr segregation 3 5.1 8
   hazmat-cfr lq 3 II 1000 12 true

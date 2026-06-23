@@ -12,7 +12,9 @@ export {
 export { checkLimitedQuantityEligibility } from "./limited-quantity.js";
 export { normalizeIdNumber, normalizeName, normalizePackingGroup } from "./normalizers.js";
 export { parseShippingDescription } from "./parser.js";
+export { getPlacard } from "./placarding.js";
 export { checkBasicSegregation } from "./segregation.js";
+export { getShippingRequirements } from "./shipping-requirements.js";
 export { decodeSpecialProvision, decodeSpecialProvisions } from "./special-provisions.js";
 export { ALL_SOURCES } from "./sources.js";
 export { validateBasicHazmatDescription } from "./validation.js";

@@ -10,6 +10,8 @@ import { checkBasicSegregation } from "./segregation.js";
 import { ALL_SOURCES, CFR_172_101, CFR_172_102, CFR_172_202, CFR_172_315, CFR_177_848 } from "./sources.js";
 import { decodeSpecialProvisions } from "./special-provisions.js";
 import { decodePackagingReference, decodeSymbol, decodeVesselStowageLocation } from "./legends.js";
+import { getPlacard } from "./placarding.js";
+import { getShippingRequirements } from "./shipping-requirements.js";
 import { jsonToolResult } from "./tool-result.js";
 import { validateBasicHazmatDescription } from "./validation.js";
 import { ECFR_SNAPSHOT_DATE } from "./data/snapshot.js";
@@ -123,6 +125,31 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
+    "get_shipping_requirements",
+    {
+      title: "Get Shipping Requirements",
+      description:
+        "One-call summary of what it takes to ship a material: identity, labels, decoded packaging references, special provisions, vessel stowage, and placarding — with citations. Looks up by UN/NA number or proper shipping name.",
+      inputSchema: {
+        query: z.string().min(1).describe("UN/NA number or proper shipping name, e.g. UN1830 or 'sulfuric acid'."),
+      },
+    },
+    async ({ query }) => jsonToolResult(getShippingRequirements(query)),
+  );
+
+  server.registerTool(
+    "get_placard",
+    {
+      title: "Get Placard",
+      description: "Return the 49 CFR 172.504 placard name and quantity threshold for a hazard class/division.",
+      inputSchema: {
+        hazardClass: z.string().min(1).describe("Hazard class or division, e.g. 3, 2.3, 8."),
+      },
+    },
+    async ({ hazardClass }) => jsonToolResult(getPlacard(hazardClass)),
+  );
+
+  server.registerTool(
     "decode_special_provision",
     {
       title: "Decode Special Provision",
@@ -223,9 +250,11 @@ CLI:
 
 Tools:
   lookup_hazmat_entry
+  get_shipping_requirements
   classify_shipping_description
   validate_basic_hazmat_description
   get_label_requirements
+  get_placard
   check_basic_segregation
   check_limited_quantity_eligibility
   decode_special_provision

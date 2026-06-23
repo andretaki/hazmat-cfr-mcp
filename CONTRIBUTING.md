@@ -19,6 +19,11 @@ marked `AUTO-GENERATED`. Never edit them by hand — change the parser or `ECFR_
 regenerate. See [docs/data-pipeline.md](docs/data-pipeline.md). A monthly `eCFR drift check`
 workflow re-ingests automatically and opens a PR when the regulation changes.
 
+Small, stable rule tables (segregation in `src/segregation.ts`, placarding in
+`src/placarding.ts`) are **hand-transcribed** from the CFR with a citation and a test, rather than
+ingested — they rarely change and have merged-cell markup. Update them by hand against the cited
+section and keep the corresponding test in sync.
+
 ## Releasing
 
 1. Bump `version` in `package.json` **and** `server.json` (keep them equal).

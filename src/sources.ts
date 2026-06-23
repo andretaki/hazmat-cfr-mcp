@@ -33,6 +33,12 @@ export const CFR_177_848: SourceCitation = {
   note: "Highway/rail segregation table and additional special restrictions for cyanides with acids, Division 4.2 with Class 8 liquids, and Division 6.1 PG I Hazard Zone A with several classes.",
 };
 
+export const CFR_172_504: SourceCitation = {
+  title: "49 CFR 172.504 General placarding requirements",
+  url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-I/subchapter-C/part-172/subpart-F/section-172.504",
+  note: "Table 1 lists materials that must be placarded in any quantity; Table 2 lists materials requiring placards at 454 kg (1,001 lb) or more aggregate gross weight.",
+};
+
 export const CFR_172_202: SourceCitation = {
   title: "49 CFR 172.202 Description of hazardous material on shipping papers",
   url: "https://www.ecfr.gov/current/title-49/subtitle-B/chapter-I/subchapter-C/part-172/subpart-C/section-172.202",
@@ -47,6 +53,7 @@ export const ALL_SOURCES = [
   CFR_172_101,
   CFR_172_102,
   CFR_172_202,
+  CFR_172_504,
   CFR_172_315,
   CFR_173_150,
   CFR_173_154,
