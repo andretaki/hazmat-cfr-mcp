@@ -7,6 +7,8 @@ The complete 49 CFR 172.101 Hazardous Materials Table, as an MCP tool for AI age
 [![MCP](https://img.shields.io/badge/MCP-stdio-blue)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+![hazmat-cfr-mcp demo](https://raw.githubusercontent.com/andretaki/hazmat-cfr-mcp/main/demo.gif)
+
 Give Claude, Cursor, Codex, and other MCP clients a DOT hazmat lookup, classification, and validation tool backed by the **entire** Hazardous Materials Table — not a sample.
 
 Ask an agent:
