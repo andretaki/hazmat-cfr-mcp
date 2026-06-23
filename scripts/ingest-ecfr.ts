@@ -58,8 +58,9 @@ async function fetchSection(section: string): Promise<string> {
 
 const BANNER = (section: string) =>
   `// AUTO-GENERATED — DO NOT EDIT BY HAND.\n` +
-  `// Source: 49 CFR ${section} via the eCFR versioner API, snapshot ${ECFR_SNAPSHOT_DATE}.\n` +
-  `// Regenerate with: npm run ingest\n`;
+  `// Source: 49 CFR ${section} via the eCFR versioner API.\n` +
+  `// Snapshot date lives in src/data/snapshot.ts (kept out of this file so drift\n` +
+  `// detection compares regulatory data, not the date). Regenerate with: npm run ingest\n`;
 
 async function main(): Promise<void> {
   const [hmtXml, spXml] = await Promise.all([fetchSection("172.101"), fetchSection("172.102")]);
@@ -82,7 +83,7 @@ async function main(): Promise<void> {
   for (const code of errata) {
     provisions.push({
       code,
-      text: `Referenced by the 49 CFR 172.101 table but not defined in 49 CFR 172.102 at the ${ECFR_SNAPSHOT_DATE} snapshot. This is a known inconsistency in the source regulation — verify against the current eCFR.`,
+      text: `Referenced by the 49 CFR 172.101 table but not defined in 49 CFR 172.102 at the pinned snapshot. This is a known inconsistency in the source regulation — verify against the current eCFR.`,
     });
   }
   provisions.sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
