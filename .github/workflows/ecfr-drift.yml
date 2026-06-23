@@ -26,11 +26,14 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
-      - name: Re-ingest eCFR as of today
+      - name: Re-ingest at the latest published eCFR revision
         run: |
-          TODAY=$(date +%F)
-          echo "Re-ingesting as of $TODAY"
-          sed -i "s/ECFR_SNAPSHOT_DATE = \".*\"/ECFR_SNAPSHOT_DATE = \"$TODAY\"/" src/data/snapshot.ts
+          # eCFR lags real time, so "today" 404s. Use Title 49's latest issued revision.
+          LATEST=$(curl -s --max-time 60 https://www.ecfr.gov/api/versioner/v1/titles.json \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); t=[x for x in d['titles'] if x['number']==49][0]; print(t['latest_issue_date'])")
+          echo "Latest issued Title 49 revision: $LATEST"
+          echo "ECFR_LATEST=$LATEST" >> "$GITHUB_ENV"
+          sed -i "s/ECFR_SNAPSHOT_DATE = \".*\"/ECFR_SNAPSHOT_DATE = \"$LATEST\"/" src/data/snapshot.ts
           npm run ingest -- --fresh
       - name: Verify data integrity
         run: npm test
@@ -43,19 +46,18 @@ jobs:
           # the date bump and exit cleanly so we don't open noise PRs.
           GENERATED="src/data/hmt-generated.ts src/data/special-provisions-generated.ts src/data/cross-references-generated.ts"
           if git diff --quiet -- $GENERATED; then
-            echo "No eCFR drift — generated data already matches the current revision."
+            echo "No eCFR drift — generated data already matches revision $ECFR_LATEST."
             git checkout -- src/data/snapshot.ts
             exit 0
           fi
-          TODAY=$(date +%F)
-          BRANCH="chore/ecfr-drift-$TODAY"
+          BRANCH="chore/ecfr-drift-$ECFR_LATEST"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git switch -c "$BRANCH"
-          git commit -am "chore(data): refresh eCFR snapshot to $TODAY"
+          git commit -am "chore(data): refresh eCFR snapshot to $ECFR_LATEST"
           git push -u origin "$BRANCH"
           gh pr create \
-            --title "chore(data): eCFR drift detected ($TODAY)" \
+            --title "chore(data): eCFR drift detected ($ECFR_LATEST)" \
             --body "Automated monthly drift check found changes in 49 CFR 172.101/172.102 since the pinned snapshot.
 
           The snapshot date and \`src/data/*-generated.ts\` have been refreshed and the data-integrity tests pass.
