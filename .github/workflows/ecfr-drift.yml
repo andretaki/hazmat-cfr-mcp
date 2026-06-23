@@ -1,0 +1,61 @@
+name: eCFR drift check
+
+# Re-ingests 49 CFR 172.101/172.102 as of *today* and opens a PR if the published
+# regulation has changed since the pinned snapshot. If the ingest or integrity tests
+# fail (e.g. a new special-provision code the parser doesn't handle), the run fails —
+# that failure is itself the "investigate" signal to the maintainer.
+
+on:
+  schedule:
+    - cron: "0 12 1 * *" # 12:00 UTC on the 1st of each month
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "lts/*"
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Re-ingest eCFR as of today
+        run: |
+          TODAY=$(date +%F)
+          echo "Re-ingesting as of $TODAY"
+          sed -i "s/ECFR_SNAPSHOT_DATE = \".*\"/ECFR_SNAPSHOT_DATE = \"$TODAY\"/" src/data/snapshot.ts
+          npm run ingest -- --fresh
+      - name: Verify data integrity
+        run: npm test
+      - name: Open PR if the regulation changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet; then
+            echo "No eCFR drift — committed data already matches the current revision."
+            exit 0
+          fi
+          TODAY=$(date +%F)
+          BRANCH="chore/ecfr-drift-$TODAY"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git commit -am "chore(data): refresh eCFR snapshot to $TODAY"
+          git push -u origin "$BRANCH"
+          gh pr create \
+            --title "chore(data): eCFR drift detected ($TODAY)" \
+            --body "Automated monthly drift check found changes in 49 CFR 172.101/172.102 since the pinned snapshot.
+
+          The snapshot date and \`src/data/*-generated.ts\` have been refreshed and the data-integrity tests pass.
+
+          **Before merging:**
+          1. Review the diff in \`src/data/*-generated.ts\` (spot-check a few entries against the live eCFR).
+          2. Re-check the \`KNOWN_ERRATA\` list in \`scripts/ingest-ecfr.ts\` — remove any code the regulation now defines.
+          3. Bump \`version\` in \`package.json\` + \`server.json\`, update \`CHANGELOG.md\`, then tag \`vX.Y.Z\` to publish."
