@@ -38,8 +38,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if git diff --quiet; then
-            echo "No eCFR drift — committed data already matches the current revision."
+          # Drift = a change in the generated DATA, not just the snapshot-date bump
+          # (the sed above always rewrites the date). If the data is unchanged, revert
+          # the date bump and exit cleanly so we don't open noise PRs.
+          GENERATED="src/data/hmt-generated.ts src/data/special-provisions-generated.ts src/data/cross-references-generated.ts"
+          if git diff --quiet -- $GENERATED; then
+            echo "No eCFR drift — generated data already matches the current revision."
+            git checkout -- src/data/snapshot.ts
             exit 0
           fi
           TODAY=$(date +%F)
