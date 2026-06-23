@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-06-23
+
+### Changed
+- Upgraded `zod` 3 → 4 (smoke-tested: all 9 MCP tools register and respond over stdio).
+- Generated data files no longer embed the snapshot date (it lives only in
+  `src/data/snapshot.ts`), so drift detection compares regulatory data, not the date.
+
+### Added
+- Maintenance automation: a monthly **eCFR drift-check** workflow that re-ingests at Title 49's
+  latest published revision and opens a PR only on real regulatory change; **Dependabot**;
+  a `CHANGELOG`; and CONTRIBUTING scope/generated-data/releasing sections.
+
 ## [0.2.2] - 2026-06-22
 
 ### Added
