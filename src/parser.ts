@@ -32,7 +32,13 @@ export function parseShippingDescription(raw: string): ParsedShippingDescription
   if (!hazardClass) warnings.push("No hazard class/division found.");
 
   if (!packingGroup) {
+    // Fallback for a packing group given without a "PG"/"PACKING GROUP" prefix.
+    // Only accept Roman-numeral tokens (I/II/III): a bare Arabic digit is
+    // indistinguishable from a hazard class (e.g. "3" is Class 3, not PG III),
+    // so guessing would invent a packing group. Explicit "PG 2" forms are
+    // already handled by PG_RE above.
     const standalonePg = tokens
+      .filter((token) => /^I{1,3}$/i.test(token.trim()))
       .map((token) => normalizePackingGroup(token))
       .find((value) => value !== undefined);
     packingGroup = standalonePg;
@@ -58,8 +64,12 @@ function inferName(tokens: string[], idNumber?: string, hazardClass?: string, pa
   const cleaned = tokens
     .map((token) => token.replace(ID_RE, "").replace(PG_RE, "").trim())
     .filter((token) => token.length > 0)
-    .filter((token) => canonicalizeHazardClass(token) !== hazardClass)
-    .filter((token) => normalizePackingGroup(token) !== packingGroup);
+    // Drop the tokens that represent the hazard class / packing group, leaving
+    // the name. Guard on the value being defined: an undefined hazardClass or
+    // packingGroup must not filter out every token (a non-class, non-PG token
+    // also normalizes to undefined).
+    .filter((token) => !hazardClass || canonicalizeHazardClass(token) !== hazardClass)
+    .filter((token) => !packingGroup || normalizePackingGroup(token) !== packingGroup);
 
   if (cleaned.length === 0) return undefined;
   const first = cleaned[0];

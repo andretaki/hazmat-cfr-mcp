@@ -90,9 +90,10 @@ export function createServer(): McpServer {
       description: "Return hazard label codes for a UN/NA number or proper shipping name from the complete 49 CFR 172.101 Hazardous Materials Table.",
       inputSchema: {
         query: z.string().min(1).describe("UN/NA number or proper shipping name."),
+        packingGroup: z.string().optional().describe("Packing group I, II, III, 1, 2, or 3. Selects the matching variant when a UN number maps to several packing groups."),
       },
     },
-    async ({ query }) => jsonToolResult(getLabelRequirements(query)),
+    async ({ query, packingGroup }) => jsonToolResult(getLabelRequirements(query, packingGroup)),
   );
 
   server.registerTool(
@@ -132,9 +133,10 @@ export function createServer(): McpServer {
         "One-call summary of what it takes to ship a material: identity, labels, decoded packaging references, special provisions, vessel stowage, and placarding — with citations. Looks up by UN/NA number or proper shipping name.",
       inputSchema: {
         query: z.string().min(1).describe("UN/NA number or proper shipping name, e.g. UN1830 or 'sulfuric acid'."),
+        packingGroup: z.string().optional().describe("Packing group I, II, III, 1, 2, or 3. Selects the matching variant when a UN number maps to several packing groups."),
       },
     },
-    async ({ query }) => jsonToolResult(getShippingRequirements(query)),
+    async ({ query, packingGroup }) => jsonToolResult(getShippingRequirements(query, packingGroup)),
   );
 
   server.registerTool(

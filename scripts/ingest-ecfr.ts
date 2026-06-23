@@ -25,6 +25,15 @@ import { parseSpecialProvisions } from "./lib/parse-special-provisions.js";
  */
 const KNOWN_ERRATA = new Set<string>(["IP16"]);
 
+/**
+ * Special-provision codes that are legitimately defined by an <FP-1> element AND
+ * also appear as a numeric footnote inside an IB code table. First-wins keeps the
+ * correct FP-1 definition; these collisions are expected. Any collision OUTSIDE
+ * this set means the source layout changed and a real definition may be at risk
+ * of being overwritten — fail the build so it gets looked at.
+ */
+const KNOWN_SP_COLLISIONS = new Set<string>(["1", "2"]);
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..");
 const CACHE = join(HERE, ".cache");
@@ -66,8 +75,21 @@ async function main(): Promise<void> {
   const [hmtXml, spXml] = await Promise.all([fetchSection("172.101"), fetchSection("172.102")]);
 
   const { entries, crossReferences, skippedRows } = parseHmt(hmtXml);
-  const { provisions } = parseSpecialProvisions(spXml);
+  const { provisions, collisions } = parseSpecialProvisions(spXml);
   const provisionCodes = new Set(provisions.map((p) => p.code));
+
+  // Surface special-provision code collisions; fail on any not on the known list.
+  const unexpectedCollisions = collisions.filter((c) => !KNOWN_SP_COLLISIONS.has(c.code));
+  for (const c of collisions) {
+    process.stdout.write(`SP collision: code ${c.code} kept from ${c.kept}, ignored ${c.ignored} definition.\n`);
+  }
+  if (unexpectedCollisions.length > 0) {
+    throw new Error(
+      `Unexpected special-provision code collision(s): ${unexpectedCollisions.map((c) => c.code).join(", ")}. ` +
+        `A lower-priority source is redefining an existing code — verify the FP-1 definition is still the one kept ` +
+        `before adding these to KNOWN_SP_COLLISIONS.`,
+    );
+  }
 
   // Referential integrity: every special-provision code referenced by the table
   // must resolve in 172.102. A dangling reference is a hard failure — UNLESS it is

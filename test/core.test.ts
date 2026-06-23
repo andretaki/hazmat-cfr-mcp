@@ -50,6 +50,31 @@ test("parses a basic DOT shipping description", () => {
   assert.deepEqual(parsed.warnings, []);
 });
 
+test("does not mistake a bare hazard-class digit for a packing group", () => {
+  // "3" is the hazard class, not packing group III. Without an explicit PG the
+  // parser must report none rather than inventing one.
+  const parsed = parseShippingDescription("UN1090, Acetone, 3");
+  assert.equal(parsed.hazardClass, "3");
+  assert.equal(parsed.packingGroup, undefined);
+  // The proper shipping name must still be inferred when no packing group is given.
+  assert.equal(parsed.properShippingName, "Acetone");
+  assert.equal(parsed.idNumber, "UN1090");
+  assert.ok(parsed.warnings.includes("No packing group found."));
+  assert.ok(!parsed.warnings.includes("No proper shipping name could be inferred."));
+});
+
+test("still parses a bare Roman-numeral packing group token", () => {
+  const parsed = parseShippingDescription("UN1090, Acetone, 3, II");
+  assert.equal(parsed.hazardClass, "3");
+  assert.equal(parsed.packingGroup, "II");
+});
+
+test("still parses an explicit PG-prefixed Arabic packing group", () => {
+  const parsed = parseShippingDescription("UN1830, Sulfuric acid, 8, PG 2");
+  assert.equal(parsed.hazardClass, "8");
+  assert.equal(parsed.packingGroup, "II");
+});
+
 test("validates a matching description", () => {
   const result = validateBasicHazmatDescription({
     idNumber: "UN1830",
@@ -59,6 +84,38 @@ test("validates a matching description", () => {
   });
   assert.equal(result.confidence, "high");
   assert.equal(result.issues.filter((issue) => issue.severity === "blocker").length, 0);
+});
+
+test("validates a non-default packing group of a multi-PG entry", () => {
+  // UN1987 (Alcohols, n.o.s.) is listed in 172.101 with PG I, II and III.
+  // A legitimate PG III shipment must not be rejected just because PG I is
+  // the first row in the table.
+  const result = validateBasicHazmatDescription({
+    idNumber: "UN1987",
+    properShippingName: "Alcohols, n.o.s.",
+    hazardClass: "3",
+    packingGroup: "III",
+  });
+  assert.equal(result.matchedEntry?.packingGroup, "III");
+  assert.equal(
+    result.issues.filter((i) => i.severity === "blocker" && i.field === "packingGroup").length,
+    0,
+    "PG III is a valid variant and must not blocker",
+  );
+});
+
+test("blocks a packing group that no variant of the entry allows", () => {
+  // UN1090 (Acetone) is PG II only — PG I must still be flagged.
+  const result = validateBasicHazmatDescription({
+    idNumber: "UN1090",
+    properShippingName: "Acetone",
+    hazardClass: "3",
+    packingGroup: "I",
+  });
+  assert.ok(
+    result.issues.some((i) => i.severity === "blocker" && i.field === "packingGroup"),
+    "PG I is not valid for UN1090",
+  );
 });
 
 test("flags incomplete descriptions", () => {
@@ -74,6 +131,21 @@ test("returns label requirements with citations", () => {
   const result = getLabelRequirements("UN1090");
   assert.deepEqual(result.labels, ["3"]);
   assert.equal(result.issues[0]?.field, "limitedQuantity");
+});
+
+test("label requirements select the requested packing group variant", () => {
+  const pgII = getLabelRequirements("UN1987", "II");
+  assert.equal(pgII.entry?.packingGroup, "II");
+  const pgIII = getLabelRequirements("UN1987", "III");
+  assert.equal(pgIII.entry?.packingGroup, "III");
+});
+
+test("label requirements note that other packing-group variants exist", () => {
+  const result = getLabelRequirements("UN1987");
+  assert.ok(
+    result.notes.some((n) => /packing group/i.test(n) && /variant/i.test(n)),
+    "a note mentions the other packing-group variants",
+  );
 });
 
 test("returns conservative segregation warnings", () => {
@@ -114,6 +186,32 @@ test("shipping requirements flags forbidden materials and missing matches", () =
   const miss = getShippingRequirements("definitely-not-a-real-chemical-xyz");
   assert.equal(miss.found, false);
   assert.equal(miss.confidence, "none");
+});
+
+test("shipping requirements select the requested packing group variant", () => {
+  // UN1987 (Alcohols, n.o.s.) has PG I, II and III with different special
+  // provisions and packaging codes. Asking for PG III must return PG III data.
+  const pgIII = getShippingRequirements("UN1987", "III");
+  assert.equal(pgIII.requirements?.packingGroup, "III");
+  assert.ok(
+    pgIII.requirements?.specialProvisions.some((p) => p.code === "TP29"),
+    "PG III special provisions returned",
+  );
+  const pgII = getShippingRequirements("UN1987", "II");
+  assert.equal(pgII.requirements?.packingGroup, "II");
+  assert.ok(pgII.requirements?.specialProvisions.some((p) => p.code === "TP28"));
+});
+
+test("shipping requirements warn and expose PG when variant is ambiguous", () => {
+  const r = getShippingRequirements("UN1987");
+  assert.ok(
+    r.caveats.some((c) => /packing group/i.test(c) && /variant/i.test(c)),
+    "caveat names the multi-variant situation",
+  );
+  assert.ok(
+    r.alternatives?.every((a) => a.packingGroup !== undefined),
+    "alternatives carry their packing group",
+  );
 });
 
 test("lookup resolves a UN number absent from the old 7-entry sample", () => {
