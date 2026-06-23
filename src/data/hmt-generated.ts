@@ -1,6 +1,7 @@
 // AUTO-GENERATED — DO NOT EDIT BY HAND.
-// Source: 49 CFR 172.101 via the eCFR versioner API, snapshot 2026-06-01.
-// Regenerate with: npm run ingest
+// Source: 49 CFR 172.101 via the eCFR versioner API.
+// Snapshot date lives in src/data/snapshot.ts (kept out of this file so drift
+// detection compares regulatory data, not the date). Regenerate with: npm run ingest
 import type { HazmatTableRow } from "../types.js";
 
 export const HMT_TABLE_ROWS: HazmatTableRow[] = [
