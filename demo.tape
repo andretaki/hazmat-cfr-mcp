@@ -10,21 +10,30 @@ Set Height 760
 Set Padding 18
 Set Theme "Dracula"
 
-Type "# hazmat-cfr — the complete 49 CFR 172.101 table, cited"
+Type "# hazmat-cfr — the complete 49 CFR hazmat table, cited"
 Enter
 Sleep 1500ms
 
-Type "hazmat-cfr lookup UN1090"
+Type "# one call: everything you need to ship a material"
+Enter
+Sleep 1200ms
+Type "hazmat-cfr requirements UN1830"
+Enter
+Sleep 4s
+
+Type "# placard for a hazard class (49 CFR 172.504)"
+Enter
+Sleep 800ms
+Type "hazmat-cfr placard 2.3"
 Enter
 Sleep 3s
 
+Type "# decode special-provision codes (49 CFR 172.102)"
+Enter
+Sleep 800ms
 Type "hazmat-cfr decode-sp IB2 T8"
 Enter
 Sleep 3s
-
-Type 'hazmat-cfr validate "UN1830, Sulfuric acid, 8, PG II"'
-Enter
-Sleep 3500ms
 
 Type "# every field traces to a pinned eCFR revision"
 Enter
