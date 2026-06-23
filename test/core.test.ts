@@ -8,6 +8,7 @@ import {
   decodeSymbol,
   defaultCatalog,
   getLabelRequirements,
+  getShippingRequirements,
   normalizeIdNumber,
   normalizePackingGroup,
   parseShippingDescription,
@@ -95,6 +96,24 @@ test("decodes Column 1 symbols and packaging references", () => {
   assert.equal(nonBulk.authorized, true);
   assert.match(nonBulk.citation?.url ?? "", /173\.202/);
   assert.equal(decodePackagingReference("exceptions", "None").authorized, false);
+});
+
+test("composite shipping requirements compose identity, placard, packaging, citations", () => {
+  const r = getShippingRequirements("UN1830");
+  assert.equal(r.found, true);
+  assert.equal(r.requirements?.hazardClass, "8");
+  assert.equal(r.requirements?.packingGroup, "II");
+  assert.equal(r.requirements?.placard.placard, "CORROSIVE");
+  assert.equal(r.requirements?.packaging.nonBulk.authorized, true);
+  assert.ok(r.citations.some((c) => c.title.includes("172.101")));
+  assert.ok(r.caveats.some((c) => /not legal advice/i.test(c)));
+  assert.ok(r.summary.includes("UN1830"));
+});
+
+test("shipping requirements flags forbidden materials and missing matches", () => {
+  const miss = getShippingRequirements("definitely-not-a-real-chemical-xyz");
+  assert.equal(miss.found, false);
+  assert.equal(miss.confidence, "none");
 });
 
 test("lookup resolves a UN number absent from the old 7-entry sample", () => {

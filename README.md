@@ -78,6 +78,8 @@ CLI:
 
 ```bash
 npx hazmat-cfr lookup UN1090
+npx hazmat-cfr requirements UN1830          # everything to ship it, in one call
+npx hazmat-cfr placard 2.3
 npx hazmat-cfr validate "UN1090, Acetone, 3, PG II"
 npx hazmat-cfr segregation 3 5.1 8
 npx hazmat-cfr lq 3 II 1000 12 true
@@ -105,9 +107,11 @@ For a local checkout, point `command` at `node` and `args` at `dist/server.js`.
 | Tool | Purpose |
 | --- | --- |
 | `lookup_hazmat_entry` | Look up by UN/NA number or proper shipping name; returns matching entries with decoded symbols and special provisions. |
+| `get_shipping_requirements` | **One call → everything to ship a material:** identity, labels, decoded packaging, special provisions, vessel stowage, placard, and citations. |
 | `classify_shipping_description` | Parse free text into structured fields, then validate it. |
 | `validate_basic_hazmat_description` | Validate structured fields against the full 172.101 table. |
 | `get_label_requirements` | Return hazard label codes and caveats. |
+| `get_placard` | 49 CFR 172.504 placard name + quantity threshold for a hazard class. |
 | `check_basic_segregation` | Conservative pairwise segregation findings (49 CFR 177.848 subset). |
 | `check_limited_quantity_eligibility` | Conservative Class 3/Class 8 LQ-candidate screen. |
 | `decode_special_provision` | Expand Column 7 codes (e.g. `IB2`, `T8`, `A3`) into 49 CFR 172.102 text. |

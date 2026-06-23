@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-23
+
+### Added
+- **`get_shipping_requirements`** — one call returns everything needed to ship a material:
+  identity, labels, decoded packaging references, special provisions, vessel stowage, placarding,
+  and deduplicated citations, plus a human-readable summary.
+- **`get_placard`** + `src/placarding.ts` — 49 CFR 172.504 Table 1/Table 2 placard name and
+  quantity threshold by hazard class, with conditional-case notes (PIH, temp-controlled 5.2, etc.).
+- CLI: `requirements <UN/NA/name>` and `placard <class>`.
+
+### Note
+- ERG guide numbers were evaluated and deferred — no verifiable public machine-readable
+  UN→guide dataset exists, and shipping unverified data would break the citation-first guarantee.
+
 ## [0.2.3] - 2026-06-23
 
 ### Changed

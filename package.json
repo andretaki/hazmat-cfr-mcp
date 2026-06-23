@@ -1,6 +1,6 @@
 {
   "name": "hazmat-cfr-mcp",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "MCP server for the complete 49 CFR 172.101 Hazardous Materials Table: hazmat lookup, special-provision decoding, parsing, and basic compliance checks — every field cited to a pinned eCFR revision.",
   "type": "module",
   "mcpName": "io.github.andretaki/hazmat-cfr-mcp",
