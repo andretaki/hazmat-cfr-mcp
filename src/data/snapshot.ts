@@ -6,7 +6,7 @@
  * refresh the data (see docs/data-pipeline.md). Keeping it pinned makes every
  * lookup reproducible and citable to an exact revision of the regulation.
  */
-export const ECFR_SNAPSHOT_DATE = "2026-06-01";
+export const ECFR_SNAPSHOT_DATE = "2026-06-17";
 
 /** eCFR versioner "full content" endpoint for a single Title 49 section. */
 export function ecfrSectionXmlUrl(section: string, date: string = ECFR_SNAPSHOT_DATE): string {

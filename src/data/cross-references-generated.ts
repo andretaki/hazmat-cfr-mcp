@@ -1,5 +1,5 @@
 // AUTO-GENERATED — DO NOT EDIT BY HAND.
-// Source: 49 CFR 172.101 via the eCFR versioner API, snapshot 2026-06-01.
+// Source: 49 CFR 172.101 via the eCFR versioner API, snapshot 2026-06-17.
 // Regenerate with: npm run ingest
 export interface CrossReference { term: string; seeAlso: string; }
 

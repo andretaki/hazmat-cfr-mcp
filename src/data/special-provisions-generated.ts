@@ -1,5 +1,5 @@
 // AUTO-GENERATED — DO NOT EDIT BY HAND.
-// Source: 49 CFR 172.102 via the eCFR versioner API, snapshot 2026-06-01.
+// Source: 49 CFR 172.102 via the eCFR versioner API, snapshot 2026-06-17.
 // Regenerate with: npm run ingest
 export const SPECIAL_PROVISIONS: Record<string, string> = {
   "1": "This material is poisonous by inhalation (see § 171.8 of this subchapter) in Hazard Zone A (see § 173.116(a) or § 173.133(a) of this subchapter), and must be described as an inhalation hazard under the provisions of this subchapter.",
@@ -306,7 +306,7 @@ export const SPECIAL_PROVISIONS: Record<string, string> = {
   "IP13": "Transportation by vessel in IBCs is prohibited.",
   "IP14": "Air must be eliminated from the vapor space by nitrogen or other means.",
   "IP15": "For UN2031 with more than 55% nitric acid, the permitted use of rigid plastic IBCs, and the inner receptacle of composite IBCs with rigid plastics, shall be two years from their date of manufacture.",
-  "IP16": "Referenced by the 49 CFR 172.101 table but not defined in 49 CFR 172.102 at the 2026-06-01 snapshot. This is a known inconsistency in the source regulation — verify against the current eCFR.",
+  "IP16": "Referenced by the 49 CFR 172.101 table but not defined in 49 CFR 172.102 at the 2026-06-17 snapshot. This is a known inconsistency in the source regulation — verify against the current eCFR.",
   "IP19": "For UN identification numbers 3531, 3532, 3533, and 3534, IBCs must be designed and constructed to permit the release of gas or vapor to prevent a build-up of pressure that could rupture the IBCs in the event of loss of stabilization.",
   "IP20": "Dry sodium cyanide or potassium cyanide is also permitted in siftproof, water-resistant, fiberboard IBCs when transported in closed freight containers or transport vehicles.",
   "IP21": "When transported by vessel, flexible, fiberboard or wooden IBCs must be sift-proof and water-resistant or be fitted with a sift-proof and water-resistant liner.",
