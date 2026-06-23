@@ -33,7 +33,7 @@ try {
       print(defaultCatalog.lookup(requireArg(args, "query")));
       break;
     case "requirements":
-      print(getShippingRequirements(requireArg(args, "query")));
+      print(getShippingRequirements(requireArg(args, "query"), args[1]));
       break;
     case "placard":
       print(getPlacard(requireArg(args, "hazard class")));
@@ -45,7 +45,7 @@ try {
       print(validateBasicHazmatDescription(parseShippingDescription(requireArg(args, "shipping description"))));
       break;
     case "labels":
-      print(getLabelRequirements(requireArg(args, "query")));
+      print(getLabelRequirements(requireArg(args, "query"), args[1]));
       break;
     case "segregation":
       print(checkBasicSegregation(args.length > 0 ? args : fail("Pass one or more hazard classes.")));

@@ -80,10 +80,42 @@ function extractDataRows(xml: string): string[][] {
   return rows;
 }
 
+/**
+ * Build the per-row columns that vary between packing-group variants of the
+ * same entry (PG, labels, special provisions, packaging, quantities, stowage).
+ * Identity columns (name, class, id, symbols) are supplied by the caller so a
+ * continuation row can inherit them from its primary row.
+ */
+function rowColumns(cells: string[]): Omit<ParsedHmtEntry, "idNumber" | "properShippingName" | "hazardClass" | "forbidden" | "symbols"> {
+  const labels = splitCodeList(cells[COL.labels]);
+  return {
+    packingGroup: normalizePackingGroup(cells[COL.packingGroup]),
+    subsidiaryRisks: labels.slice(1),
+    labels,
+    specialProvisions: splitCodeList(cells[COL.specialProvisions]),
+    packaging: {
+      exceptions: blankToUndef(cells[COL.pkgExceptions]),
+      nonBulk: blankToUndef(cells[COL.pkgNonBulk]),
+      bulk: blankToUndef(cells[COL.pkgBulk]),
+    },
+    quantityLimitations: {
+      passengerAircraftRail: blankToUndef(cells[COL.qtyPassengerAircraftRail]),
+      cargoAircraftOnly: blankToUndef(cells[COL.qtyCargoAircraftOnly]),
+    },
+    vesselStowage: {
+      location: blankToUndef(cells[COL.vesselLocation]),
+      other: blankToUndef(cells[COL.vesselOther]),
+    },
+  };
+}
+
 export function parseHmt(xml: string): ParsedHmt {
   const entries: ParsedHmtEntry[] = [];
   const crossReferences: CrossReference[] = [];
   let skippedRows = 0;
+  // The most recent primary entry (one with an id), used as the identity
+  // carrier for the blank-name continuation rows that follow it.
+  let carrier: ParsedHmtEntry | undefined;
 
   for (const cells of extractDataRows(xml)) {
     const name = cells[COL.name];
@@ -92,11 +124,27 @@ export function parseHmt(xml: string): ParsedHmt {
     const isForbidden = hazardClass.toLowerCase() === "forbidden";
 
     if (!ID_RE.test(id) && !isForbidden) {
-      // No identification number and not a forbidden entry: either a
-      // "term, see preferred-name" cross-reference, or a blank spacer row.
+      // No id and not Forbidden. Three possibilities, in priority order:
+      //   1. "term, see preferred-name" cross-reference (name carries text).
+      //   2. A continuation row of a multi-packing-group entry: the source
+      //      table states the name/class/id only once, then lists each
+      //      additional packing group on its own row with blank identity
+      //      cells. These MUST inherit identity from the carrier above —
+      //      dropping them silently loses 500+ PG variants (see UN1987).
+      //   3. A genuine blank spacer row.
       const seeMatch = name.match(SEE_RE);
+      const cols = rowColumns(cells);
       if (seeMatch) {
         crossReferences.push({ term: seeMatch[1].trim(), seeAlso: seeMatch[2].trim() });
+      } else if (name === "" && cols.packingGroup && carrier) {
+        entries.push({
+          idNumber: carrier.idNumber,
+          properShippingName: carrier.properShippingName,
+          hazardClass: carrier.hazardClass,
+          forbidden: carrier.forbidden,
+          symbols: carrier.symbols,
+          ...cols,
+        });
       } else {
         skippedRows += 1;
       }
@@ -107,32 +155,19 @@ export function parseHmt(xml: string): ParsedHmt {
       .split(/[\s,]+/)
       .map((s) => s.trim())
       .filter((s) => SYMBOL_RE.test(s));
-    const labels = splitCodeList(cells[COL.labels]);
 
-    entries.push({
+    const entry: ParsedHmtEntry = {
       idNumber: ID_RE.test(id) ? id : undefined,
       properShippingName: name,
       hazardClass,
       forbidden: isForbidden,
       symbols,
-      packingGroup: normalizePackingGroup(cells[COL.packingGroup]),
-      subsidiaryRisks: labels.slice(1),
-      labels,
-      specialProvisions: splitCodeList(cells[COL.specialProvisions]),
-      packaging: {
-        exceptions: blankToUndef(cells[COL.pkgExceptions]),
-        nonBulk: blankToUndef(cells[COL.pkgNonBulk]),
-        bulk: blankToUndef(cells[COL.pkgBulk]),
-      },
-      quantityLimitations: {
-        passengerAircraftRail: blankToUndef(cells[COL.qtyPassengerAircraftRail]),
-        cargoAircraftOnly: blankToUndef(cells[COL.qtyCargoAircraftOnly]),
-      },
-      vesselStowage: {
-        location: blankToUndef(cells[COL.vesselLocation]),
-        other: blankToUndef(cells[COL.vesselOther]),
-      },
-    });
+      ...rowColumns(cells),
+    };
+    entries.push(entry);
+    // Only a row with an id can carry identity to later continuation rows;
+    // a Forbidden row (no id) must not absorb the blank rows that follow it.
+    if (entry.idNumber) carrier = entry;
   }
 
   return { entries, crossReferences, skippedRows };

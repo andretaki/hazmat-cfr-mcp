@@ -20,8 +20,22 @@ export interface SpecialProvision {
   text: string;
 }
 
+/**
+ * A code defined by more than one source group with differing text. First-wins
+ * (FP > tables > paragraphs > explicit) keeps the higher-priority definition;
+ * the collision is recorded so a future source/order change is loud, not silent.
+ * Real example: numeric codes "1"/"2" are real FP provisions AND appear as IB
+ * table footnotes — the FP definition must always win.
+ */
+export interface SpecialProvisionCollision {
+  code: string;
+  kept: string;
+  ignored: string;
+}
+
 export interface ParsedSpecialProvisions {
   provisions: SpecialProvision[];
+  collisions: SpecialProvisionCollision[];
 }
 
 /** Leading-token shape for a valid special-provision code. */
@@ -119,12 +133,30 @@ const EXPLICIT: SpecialProvision[] = [
 
 export function parseSpecialProvisions(xml: string): ParsedSpecialProvisions {
   const byCode = new Map<string, string>();
-  // Priority order: FP elements, then tables, then TP/R paragraphs, then explicit prose codes.
-  for (const { code, text } of [...fromFpElements(xml), ...fromTables(xml), ...fromParagraphs(xml), ...EXPLICIT]) {
-    if (!byCode.has(code)) byCode.set(code, text);
+  const sourceOf = new Map<string, string>();
+  const collisions: SpecialProvisionCollision[] = [];
+  // Priority order: FP elements, then tables, then TP/R paragraphs, then explicit
+  // prose codes. First definition wins; a later source that redefines an existing
+  // code with DIFFERENT text from a DIFFERENT group is recorded as a collision so
+  // an ordering regression surfaces instead of silently corrupting a definition.
+  const groups: Array<readonly [string, SpecialProvision[]]> = [
+    ["fp", fromFpElements(xml)],
+    ["table", fromTables(xml)],
+    ["paragraph", fromParagraphs(xml)],
+    ["explicit", EXPLICIT],
+  ];
+  for (const [group, provisions] of groups) {
+    for (const { code, text } of provisions) {
+      if (!byCode.has(code)) {
+        byCode.set(code, text);
+        sourceOf.set(code, group);
+      } else if (sourceOf.get(code) !== group && byCode.get(code) !== text) {
+        collisions.push({ code, kept: sourceOf.get(code)!, ignored: group });
+      }
+    }
   }
   const provisions = [...byCode.entries()]
     .map(([code, text]) => ({ code, text }))
     .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
-  return { provisions };
+  return { provisions, collisions };
 }

@@ -54,6 +54,26 @@ test("parseHmt: routes 'see' rows to cross-references, not entries", () => {
   assert.equal(xref!.seeAlso, "p-Nitrosodimethylaniline");
 });
 
+test("parseHmt: keeps every packing-group variant of a multi-PG entry", () => {
+  const variants = hmt.entries.filter((e) => e.idNumber === "UN1987");
+  assert.equal(variants.length, 3, "UN1987 has PG I, II and III rows");
+  assert.deepEqual(
+    variants.map((e) => e.packingGroup),
+    ["I", "II", "III"],
+  );
+  // Continuation rows inherit identity from the primary row…
+  for (const v of variants) {
+    assert.equal(v.properShippingName, "Alcohols, n.o.s.");
+    assert.equal(v.hazardClass, "3");
+    assert.equal(v.forbidden, false);
+  }
+  // …but carry their own per-row packaging / quantity columns.
+  const pgIII = variants.find((e) => e.packingGroup === "III")!;
+  assert.equal(pgIII.packaging.nonBulk, "203");
+  assert.equal(pgIII.quantityLimitations.passengerAircraftRail, "60 L");
+  assert.deepEqual(pgIII.specialProvisions, ["172", "B1", "IB3", "T4", "TP1", "TP29"]);
+});
+
 test("parseHmt: skips blank rows", () => {
   assert.equal(hmt.skippedRows, 1);
 });
@@ -76,4 +96,24 @@ test("parseSpecialProvisions: labels multi-column T-code rows", () => {
   assert.match(t4, /Minimum test pressure \(bar\): 2\.65/);
   assert.match(t4, /Pressure-relief requirements: Normal/);
   assert.doesNotMatch(t4, /See §/); // header reference notes stripped
+});
+
+test("parseSpecialProvisions: FP-1 definition wins over a colliding table footnote", () => {
+  // A numeric code ("1") is a real FP-1 special provision AND appears as a
+  // leading footnote token inside an IB table. The FP-1 text must win, and the
+  // collision must be reported so a future ordering regression is loud.
+  const xml = `
+    <FP-1>1 Real special provision one — poisonous by inhalation.</FP-1>
+    <TABLE>
+      <TR><TD>IB1</TD><TD>Authorized non-bulk packaging.</TD></TR>
+      <TR><TD>1 Flexible plastic (51H) large packagings footnote.</TD></TR>
+    </TABLE>`;
+  const parsed = parseSpecialProvisions(xml);
+  const byCode = new Map(parsed.provisions.map((p) => [p.code, p.text]));
+  assert.match(byCode.get("1") ?? "", /poisonous by inhalation/);
+  assert.doesNotMatch(byCode.get("1") ?? "", /Flexible plastic/);
+  assert.ok(
+    parsed.collisions.some((c) => c.code === "1" && c.kept === "fp" && c.ignored === "table"),
+    "collision recorded with FP-1 kept",
+  );
 });

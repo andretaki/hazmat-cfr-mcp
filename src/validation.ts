@@ -43,7 +43,13 @@ export function validateBasicHazmatDescription(
   }
 
   const candidates = findCandidates(normalized, catalog);
-  const matchedEntry = candidates[0];
+  // A single UN number can map to several rows that differ only by packing
+  // group (e.g. UN1987 lists PG I, II and III). Compare against the variant
+  // that matches the declared packing group rather than blindly the first row,
+  // otherwise a legitimate PG II/III shipment is rejected against the PG I row.
+  const matchedEntry =
+    (normalized.packingGroup && candidates.find((c) => c.packingGroup === normalized.packingGroup)) ||
+    candidates[0];
   if (!matchedEntry) {
     issues.push({
       severity: "warning",

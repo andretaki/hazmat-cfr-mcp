@@ -8,10 +8,11 @@
  */
 import { defaultCatalog } from "./catalog.js";
 import { decodePackagingReference, decodeSymbol, decodeVesselStowageLocation } from "./legends.js";
+import { normalizePackingGroup } from "./normalizers.js";
 import { getPlacard } from "./placarding.js";
 import { decodeSpecialProvisions } from "./special-provisions.js";
 import { CFR_172_101 } from "./sources.js";
-import type { Confidence, HazmatEntry, SourceCitation } from "./types.js";
+import type { Confidence, HazmatEntry, PackingGroup, SourceCitation } from "./types.js";
 
 const NOT_LEGAL_ADVICE =
   "Informational aid based on public 49 CFR text — not legal advice or a compliance certification. Verify against the current eCFR.";
@@ -77,13 +78,13 @@ export interface ShippingRequirementsResult {
   found: boolean;
   confidence: Confidence;
   requirements?: ReturnType<typeof composeEntry>["composed"];
-  alternatives?: Array<{ idNumber?: string; properShippingName: string }>;
+  alternatives?: Array<{ idNumber?: string; properShippingName: string; packingGroup?: PackingGroup }>;
   caveats: string[];
   citations: SourceCitation[];
   summary: string;
 }
 
-export function getShippingRequirements(query: string): ShippingRequirementsResult {
+export function getShippingRequirements(query: string, packingGroup?: string): ShippingRequirementsResult {
   const lookup = defaultCatalog.lookup(query);
   if (lookup.entries.length === 0) {
     return {
@@ -96,12 +97,27 @@ export function getShippingRequirements(query: string): ShippingRequirementsResu
     };
   }
 
-  const entry = lookup.entries[0];
+  // A single UN number can map to several rows differing only by packing group,
+  // each with its own special provisions, packaging codes and quantity limits.
+  // Honour an explicit packing group; otherwise fall back to the first row.
+  const requestedPg = normalizePackingGroup(packingGroup);
+  const entry =
+    (requestedPg && lookup.entries.find((e) => e.packingGroup === requestedPg)) || lookup.entries[0];
   const { composed, citations } = composeEntry(entry);
 
   const caveats = [NOT_LEGAL_ADVICE];
   if (composed.forbidden) {
     caveats.unshift("⚠ This material is FORBIDDEN for transportation under 49 CFR 172.101.");
+  }
+  // Surface the multi-variant situation so a caller never mistakes one packing
+  // group's requirements for all of them.
+  const variantPgs = lookup.entries.map((e) => e.packingGroup).filter((pg): pg is PackingGroup => Boolean(pg));
+  if (variantPgs.length > 1) {
+    if (requestedPg && entry.packingGroup === requestedPg) {
+      caveats.push(`Showing packing group ${requestedPg}; this material also has packing group variants ${variantPgs.filter((pg) => pg !== requestedPg).join(", ")} with different requirements.`);
+    } else {
+      caveats.push(`This material has multiple packing group variants (${variantPgs.join(", ")}) with different special provisions, packaging and quantity limits. Showing PG ${composed.packingGroup ?? "?"}; pass a packing group to select another.`);
+    }
   }
   if (composed.placard.threshold !== "none") {
     caveats.push("Placarding shown is by hazard class only; aggregate-weight, mixed-load (DANGEROUS), and subsidiary-hazard placards require reviewing the full shipment.");
@@ -122,7 +138,10 @@ export function getShippingRequirements(query: string): ShippingRequirementsResu
     found: true,
     confidence: lookup.confidence,
     requirements: composed,
-    alternatives: lookup.entries.slice(1, 4).map((e) => ({ idNumber: e.idNumber, properShippingName: e.properShippingName })),
+    alternatives: lookup.entries
+      .filter((e) => e !== entry)
+      .slice(0, 3)
+      .map((e) => ({ idNumber: e.idNumber, properShippingName: e.properShippingName, packingGroup: e.packingGroup })),
     caveats,
     citations,
     summary,
